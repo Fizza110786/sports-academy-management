@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 
 const scheduleSchema = new mongoose.Schema({
-  date: Number,
-  program: String,
+  date: String,
+  batch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Batch"
+  },
   title: String,
   coach: {
     type: mongoose.Schema.Types.ObjectId,

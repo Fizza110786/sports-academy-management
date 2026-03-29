@@ -20,6 +20,9 @@ const batchSchema = new mongoose.Schema({
     },
   ],
 
+  // ✅ ADDED
+  ageGroup: String,
+
   timing: String,
   days: String,
 

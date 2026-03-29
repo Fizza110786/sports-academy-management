@@ -9,8 +9,25 @@ exports.getUsers = async (req, res) => {
   try {
     const users = await User.find()
       .populate("batch")
-      .sort({ batch: 1, name: 1 }); // ✅ sort by batch first, then name within each batch
-    res.json(users);
+      .sort({ batch: 1, name: 1 });
+
+    // ✅ ADD THIS BLOCK (ONLY CHANGE)
+    const updatedUsers = await Promise.all(
+      users.map(async (user) => {
+        if (user.role === "coach") {
+          const coachBatch = await Batch.findOne({ coach: user._id });
+
+          return {
+            ...user.toObject(),
+            batch: coachBatch || null, // 👈 inject batch for coach
+          };
+        }
+
+        return user;
+      })
+    );
+
+    res.json(updatedUsers);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -102,11 +119,7 @@ exports.deleteUser = async (req, res) => {
     }
 
     if (user.profileImage) {
-      const imagePath = path.join(
-        __dirname,
-        "..",
-        user.profileImage
-      );
+      const imagePath = path.join(__dirname, "..", user.profileImage);
 
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
